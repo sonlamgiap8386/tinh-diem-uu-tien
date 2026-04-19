@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tính điểm ưu tiên</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #5f7cff, #7b4dbb);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 400px 1fr;
+    gap: 30px;
+    max-width: 1200px;
+    width: 95%;
+    align-items: center;
+}
+
+.note {
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.note h3 {
+    margin-bottom: 10px;
+}
+
+.note h4 {
+    margin-top: 12px;
+    margin-bottom: 6px;
+    color: #00ffd5;
+}
+
+/* Card */
+.card {
+    background: rgba(255,255,255,0.15);
+    padding: 30px;
+    border-radius: 25px;
+    backdrop-filter: blur(15px);
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 14px;
+    margin-top: 10px;
+    display: block;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    background: rgba(255,255,255,0.9);
+}
+
+input.error {
+    border: 2px solid red;
+}
+
+/* Result */
+.result {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.25);
+}
+
+.value {
+    color: #00ffd5;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #00ffd5, #5f7cff, #ff7cf5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: glowMove 3s infinite linear;
+}
+
+@keyframes glowMove {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- TRÁI -->
+    <div class="note">
+        <h3>📍 Khu vực ưu tiên</h3>
+        <p><b>KV1 (+0.75):</b> Xã đặc biệt khó khăn, biên giới, ATK</p>
+        <p><b>KV2-NT (+0.5):</b> Không thuộc KV1, KV2, KV3</p>
+        <p><b>KV2 (+0.25):</b> Các phường thuộc thuộc tỉnh, các xã thuộc TP trực thuộc trung ương</p>
+        <p><b>KV3 (+0):</b> Nội thành TP trực thuộc TW</p>
+    </div>
+
+    <!-- GIỮA -->
+    <div class="card">
+        <div class="title">🎓 Tính điểm ưu tiên tuyển sinh ĐH, CĐ</div>
+
+        <label>Điểm thi (0 - 30)</label>
+        <input type="number" id="diem" step="0.01" min="0" max="30">
+
+        <label>Khu vực</label>
+        <select id="khuvuc">
+            <option value="0.75">KV1</option>
+            <option value="0.5">KV2-NT</option>
+            <option value="0.25">KV2</option>
+            <option value="0">KV3</option>
+        </select>
+
+        <label>Đối tượng</label>
+        <select id="doituong">
+            <option value="2">ƯT1 (01–04)</option>
+            <option value="1">ƯT2 (05–07)</option>
+            <option value="0">Không ưu tiên</option>
+        </select>
+
+        <div class="result" id="ketqua">👉 Nhập điểm để tính</div>
+
+        <div class="footer">GVK_512</div>
+    </div>
+
+    <!-- PHẢI -->
+    <div class="note">
+        <h3>🎯 Đối tượng ưu tiên</h3>
+
+        <h4>Nhóm ưu tiên 1</h4>
+        <p>01: Dân tộc thiểu số KV1</p>
+        <p>02: Công nhân ≥ 5 năm</p>
+        <p>03: Quân nhân tại ngũ KV1</p>
+        <p>04: Người có công</p>
+
+        <h4>Nhóm ưu tiên 2</h4>
+        <p>05: Quân nhân &lt; 12 tháng</p>
+        <p>06: Dân tộc thiểu số ngoài KV1</p>
+        <p>07: Người khuyết tật nặng</p>
+    </div>
+
+</div>
+
+<script>
+const diem = document.getElementById("diem");
+const kv = document.getElementById("khuvuc");
+const dt = document.getElementById("doituong");
+const kq = document.getElementById("ketqua");
+
+function tinh() {
+    let d = parseFloat(diem.value);
+
+    // ❌ Validate
+    if (isNaN(d) || d < 0 || d > 30) {
+        diem.classList.add("error");
+        kq.innerHTML = "❌ Điểm nhập vào không hợp lệ";
+        return;
+    } else {
+        diem.classList.remove("error");
+    }
+
+    let tongUuTien = parseFloat(kv.value) + parseFloat(dt.value);
+
+    let cong = d <= 22.5
+        ? tongUuTien
+        : ((30 - d) / 7.5) * tongUuTien;
+
+    let tong = d + cong;
+
+    kq.innerHTML = `
+        🎯 Điểm ưu tiên: <span class="value">${cong.toFixed(2)}</span><br>
+        🧮 Tổng điểm: <span class="value">${tong.toFixed(2)}</span>
+    `;
+}
+
+diem.addEventListener("input", tinh);
+kv.addEventListener("change", tinh);
+dt.addEventListener("change", tinh);
+</script>
+
+</body>
+</html>
